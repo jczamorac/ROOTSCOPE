@@ -1538,6 +1538,13 @@ void ROOTSCOPE::Get_Sum( bool isTH2 ) {
         << Form("We have %d counts above bg.", counts)  <<  endl;
         fText_viewer->ShowBottom();
 
+	//print out on screen
+	cout<<"*****************Area and sum over selected range*****************"<<endl;
+	cout<<"Sum from "<<xMin+ 0.5*histo->GetBinWidth(1)<<" to  "<<xMax- 0.5*histo->GetBinWidth(1)<<"  (binwidth = "<<histo->GetBinWidth(1)<<"  , total bins = "<<histo->GetNbinsX()<<")"<<endl;
+	cout<<"Total area: "<<area<<"     bg area: "<<area_bg<<endl;
+	cout<<"Subtracted area: "<<area_less_bg<<endl;
+	cout<<"Counts: "<<counts<<endl;
+	cout<<endl;
 	
     }
 
@@ -1700,7 +1707,8 @@ void ROOTSCOPE::Fit_Gaussian() {
 
         //fTF1_gaus_bg->SetParLimits  ( 3, init_c*0.95, init_c*1.05);
 
-        histo->Fit( fTF1_gaus_bg, "MQNB", "", xMin, xMax  ); // B = to set boundary.
+        //histo->Fit( fTF1_gaus_bg, "MQNB", "", xMin, xMax  ); // B = to set boundary.
+	histo->Fit( fTF1_gaus_bg, "MNB", "", xMin, xMax  ); // B = to set boundary.
 
 
 
@@ -1733,6 +1741,17 @@ void ROOTSCOPE::Fit_Gaussian() {
             Form( "\nCenter = %5.3f, cnt = %5.2f FWHM = %7.4f, Chisqr/N = %5.2f, Area/cmp = %5.2f (cmp=%d)\n",
             fitted_c, area/histo->GetBinWidth(1), FWHM, chisqr, area/fCmp, fCmp ) <<  endl;
         fText_viewer->ShowBottom();
+
+
+	// print out on the screen
+    	 cout<<"************  Peak 1"<<" ************"<<endl;
+    	 cout<<"Centroid:  "<< fitted_c <<endl;
+    	 cout<<"Counts:  "<< area/histo->GetBinWidth(1) <<endl;
+    	 cout<<"Area:  "<< area << endl;
+    	 cout<<"FWHM:  "<< FWHM << endl;
+    	 cout<<endl;
+
+
 
     }
 
@@ -2111,7 +2130,8 @@ void ROOTSCOPE::Fit_N_Gaussian() {
         
 
 
-        histo->Fit( fTF1_n_gaus_bg, "MNQB", "", xMin, xMax  );
+        //histo->Fit( fTF1_n_gaus_bg, "MNQB", "", xMin, xMax  );
+	histo->Fit( fTF1_n_gaus_bg, "MNB", "", xMin, xMax  );
 	
 
 
@@ -2180,7 +2200,7 @@ void ROOTSCOPE::Fit_N_Gaussian() {
       
 
         // print out on the screen
-        /*for (int p=0;p<fUser_generalN;p++) {
+        for (int p=0;p<fUser_generalN;p++) {
         float area = TMath::Sqrt( 2 * TMath::Pi() ) * fTF1_n_gaus_bg->GetParameter(3*p+2) * fTF1_n_gaus_bg->GetParameter(3*p+4);
         cout<<"************  Peak "<<p+1<<" ************"<<endl;
         cout<<"Centroid:  "<<fTF1_n_gaus_bg->GetParameter(3*p+3)<<endl;
@@ -2189,7 +2209,7 @@ void ROOTSCOPE::Fit_N_Gaussian() {
         cout<<"FWHM:  "<<fTF1_n_gaus_bg->GetParameter(3*p+4)*2.35482<<endl;
         cout<<endl;
         	}
-        */
+        
       
 
     }
