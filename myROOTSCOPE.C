@@ -104,8 +104,9 @@ private:
     TSpectrum*      peakFinder;
     Float_t         fSigma_guess;       /* parameters for finding peaks*/
     Float_t         fThreshold;         /* parameters for finding peaks*/
-
-
+    TSpectrum*      TSbg;
+    //TH1*    hBG;                       /* the 1D histo for TSpectrum background */
+    Double_t * hsource;			/*histogram points for TSpectrum use*/
     //---------------for 2d histo----------------------------//
     TH2*           histo2d;            /* the 2D histo  */
     TH2*           histo2d_backup;     /* the 2D histo backup */
@@ -251,6 +252,8 @@ private:
     void Set_Linear_Background(); // similar to previous one
                                   // estimate the bg by the edges of a peak.
 
+    void Set_TSpec_Background(); // use TSpectrum to estimate the bg
+
     void Set_Background(); // manual input.
 
     void Reset_Background(); // set const = linear = 0.
@@ -323,6 +326,8 @@ private:
     void  Set_Line( TLine*, float x1, float y1, float x2, float y2 );
 
     void  To_Draw_bg();
+
+    void  To_Draw_bg2();
 
     void  Set_init_fit_value( double, double, double& , double& , double& );
 
@@ -527,7 +532,9 @@ void ROOTSCOPE::To_response(Event_t* e) {
 
             else if( key_symbol == kKey_0 )  { Reset_Background(); }
 
-	        else if( key_symbol == kKey_l )  { Set_Linear_Background(); } //todo: write note in manual.
+	    else if( key_symbol == kKey_l )  { Set_Linear_Background(); } //todo: write note in manual.
+	
+	    else if( key_symbol == kKey_B )  { Set_TSpec_Background(); } //to estimate BG with TSpectrum
 
         }
 
@@ -1106,6 +1113,8 @@ void ROOTSCOPE::Get_active_histo1D() {
         if ( htemp == nullptr ) continue;
         histo = htemp; // grab the TH1 address to "histo"
 
+	
+
 
     }
 
@@ -1216,11 +1225,14 @@ void ROOTSCOPE::Initialization() {
 
     
     fTF1_n_gaus_bg
-    = new TF1( "n_gauss_bg", n_gauss_bg, fXrange_pick1, fXrange_pick2, 3*NPEAKS+2 );
+    //= new TF1( "n_gauss_bg", n_gauss_bg, fXrange_pick1, fXrange_pick2, 3*NPEAKS+2 ); 
+      = new TF1( "n_gauss_bg", n_gauss_bg2, fXrange_pick1, fXrange_pick2, 3*NPEAKS+2 ); //Function + TSpectrum BG
     fTF1_n_gaus_bg->SetNpx( 500 );
 
-
-
+    //Define bg histogram from TSpectrum 
+    TSbg = new TSpectrum();
+    hBG = new TH1F("TSbg","",4096,0,4096);
+	
     gStyle->SetOptStat(kFALSE);
 }
 
@@ -1515,7 +1527,8 @@ void ROOTSCOPE::Get_Sum( bool isTH2 ) {
             area += ( height * dX );
 
              float bgValue
-             = fBG_const + fBG_linear * histo->GetXaxis()->GetBinCenter(i);
+             //= fBG_const + fBG_linear * histo->GetXaxis()->GetBinCenter(i);
+	     = fBG_const + fBG_linear * histo->GetXaxis()->GetBinCenter(i) + hBG->GetBinContent(i); //line+TSpectrum bg
 
             // remove the bg
             if( height > bgValue) { counts += (height - bgValue); } 
@@ -1526,8 +1539,10 @@ void ROOTSCOPE::Get_Sum( bool isTH2 ) {
         float y2 = fBG_const + fBG_linear * (xMax - 0.5*histo->GetBinWidth(1));
         float  w = xMax - xMin - histo->GetBinWidth(1); // width
         float area_bg = 0;
-        if(y2>=y1) { area_bg = 0.5*w*(y2-y1) + y1*w; }
-        else{        area_bg = 0.5*w*(y1-y2) + y2*w; }
+        if(y2>=y1) { area_bg = 0.5*w*(y2-y1) + y1*w + hBG->Integral(binx1,binx2,"width");} //line+TSpectrum bg
+        else{        area_bg = 0.5*w*(y1-y2) + y2*w + hBG->Integral(binx1,binx2,"width"); } //line+TSpectrum bg
+	//if(y2>=y1) { area_bg = 0.5*w*(y2-y1) + y1*w;} 
+        //else{        area_bg = 0.5*w*(y1-y2) + y2*w; } 
 
         double area_less_bg = area - area_bg;
 
@@ -1811,6 +1826,30 @@ void ROOTSCOPE::Set_Linear_Background( ) {
     fText_viewer->ShowBottom();
 }
 
+
+void ROOTSCOPE::Set_TSpec_Background( ) {
+
+    // reset
+    
+
+    int Bnbins = histo->GetNbinsX();    
+    float x_Hmin =  histo->GetXaxis()->GetXmin();
+    float x_Hmax =  histo->GetXaxis()->GetXmax();
+    
+    hBG->SetBins(Bnbins,x_Hmin,x_Hmax);
+    hBG->Reset("ICE");
+    hsource = new Double_t[Bnbins];
+
+    for (int i = 0; i < Bnbins; i++) hsource[i]=histo->GetBinContent(i + 1);
+   
+    //TSbg->Background(hsource,Bnbins,10,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder8,kTRUE,TSpectrum::kBackSmoothing5,kTRUE); //compton edges
+    TSbg->Background(hsource,Bnbins,20,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder2,kFALSE,TSpectrum::kBackSmoothing3,kFALSE); //smooth
+
+   for (int i = 0; i < Bnbins; i++) hBG->SetBinContent(i + 1,hsource[i]);
+   
+        To_Draw_bg2();
+   
+}
  
 
 void ROOTSCOPE::Fit_Background() {
@@ -1853,9 +1892,12 @@ void ROOTSCOPE::Reset_Background() {
     Clear_Marker();
     fBG_const = 0.;
     fBG_linear = 0.;
+    hBG->Reset("ICE");
+    
 
     *fText_viewer << Form( "\nreset bg const = 0 and linear = 0" ) <<  endl;
     fText_viewer->ShowBottom();
+    c1->GetPad(fPadActive)->Update();
 }
 
 void ROOTSCOPE::To_Draw_bg() {
@@ -1889,6 +1931,21 @@ void ROOTSCOPE::To_Draw_bg() {
     fText_viewer->ShowBottom();
 }
 
+
+void ROOTSCOPE::To_Draw_bg2() {
+
+    /* only plot the bg level line on click-selected pad. */
+
+    Clear_Marker();
+
+    hBG->SetLineColor(kRed);
+    hBG->Draw("same"); 
+    histo->Draw("same"); 
+
+    c1->GetPad(fPadActive)->Update();
+
+    fText_viewer->ShowBottom();
+}
 
 
 void ROOTSCOPE::Fit_Double_Gaussian() {
