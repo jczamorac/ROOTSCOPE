@@ -2483,7 +2483,7 @@ Dlg_double_gaussian::Dlg_double_gaussian(   const TGWindow* p,
 ///////////////////////////////////////////////////////////////////////////////
 
 
- 
+
 
 // use this class to handle the initial condition.
 class Dlg_N_gaussian: public TGMainFrame {
@@ -2500,7 +2500,7 @@ class Dlg_N_gaussian: public TGMainFrame {
 
     TGVerticalFrame*    fVF;
     TGLabel*            fLabel_header[4];
-   
+
     TGLabel**           fLabel_peaks;
     TGNumberEntry**     fEntry_peaks;
     TString*            fPeaksString;
@@ -2540,8 +2540,8 @@ void Dlg_N_gaussian::To_switch_tab(){
     int itemN = 3 * fNpeaks;
 
     if( tabSwitch == -1 ){ tabSwitch = itemN-1; }
-    if( tabSwitch % itemN  ==0 && tabSwitch > 0 ) { 
-        tabSwitch=0; 
+    if( tabSwitch % itemN  ==0 && tabSwitch > 0 ) {
+        tabSwitch=0;
     } // to reset.
 
     // int peakIdx = tabSwitch / 3;
@@ -2573,7 +2573,7 @@ void Dlg_N_gaussian::Cancel(){
         fPeaks_center[i] = 0.;
         fPeaks_sigma[i]  = 0.;
     }
-  
+
     CloseWindow();
 
  }
@@ -2643,7 +2643,7 @@ Dlg_N_gaussian::Dlg_N_gaussian( const TGWindow* p,
     fPeaks_h        = peaks_h;
     fPeaks_center   = peaks_center;
     fPeaks_sigma    = peaks_sigma;
-    fNpeaks         = npeaks; 
+    fNpeaks         = npeaks;
 
 
     fInitValue = new float [ npeaks*3 ];
@@ -2659,7 +2659,7 @@ Dlg_N_gaussian::Dlg_N_gaussian( const TGWindow* p,
 
     TGLayoutHints*  Layout1 = new TGLayoutHints( kLHintsCenterY, 2, 2, 2, 2);
 
-  
+
     //=========================================================
     // using Matrix Layout.
 
@@ -2668,14 +2668,14 @@ Dlg_N_gaussian::Dlg_N_gaussian( const TGWindow* p,
     Int_t nRow = npeaks + 1; // one for header
     Int_t nCol = 4;          // peakN, h, c, w.
     fVF->SetLayoutManager ( new TGMatrixLayout( fVF , nRow, nCol) );
-   
+
 
     fLabel_header[0] = new TGLabel( fVF, "peakN " );
     fLabel_header[1] = new TGLabel( fVF, " height " );
     fLabel_header[2] = new TGLabel( fVF, " center " );
     fLabel_header[3] = new TGLabel( fVF, " width " );
     for( int i=0; i<4; i++ ){
-        fLabel_header[i]->SetTextJustify( kTextCenterX );    
+        fLabel_header[i]->SetTextJustify( kTextCenterX );
         fVF->AddFrame( fLabel_header[i], Layout1 );
     }
 
@@ -2684,21 +2684,21 @@ Dlg_N_gaussian::Dlg_N_gaussian( const TGWindow* p,
 
     for( int i=0; i<npeaks; i++ ){
 
-        fLabel_peaks[i] = new TGLabel( fVF, Form( "peak%d",i+1) );  
-        fLabel_peaks[i]->SetTextJustify( kTextCenterX );         
-        fVF->AddFrame( fLabel_peaks[i], Layout1 );   
+        fLabel_peaks[i] = new TGLabel( fVF, Form( "peak%d",i+1) );
+        fLabel_peaks[i]->SetTextJustify( kTextCenterX );
+        fVF->AddFrame( fLabel_peaks[i], Layout1 );
 
 
         // number entries
         for( int j=0; j<3; j++) {
-            
-            int idx = j + 3 * i; 
-            
+
+            int idx = j + 3 * i;
+
             fEntry_peaks[idx]
             = new TGNumberEntry(    fVF,               // base frame
                                     fInitValue[idx],   // inital value
-                                    12,                // digit width 
-                                    idx,               // ID 
+                                    12,                // digit width
+                                    idx,               // ID
                                     TGNumberFormat::kNESRealOne);
 
             fEntry_peaks[idx]->GetNumberEntry()
@@ -2708,9 +2708,9 @@ Dlg_N_gaussian::Dlg_N_gaussian( const TGWindow* p,
 
             fVF->AddFrame( fEntry_peaks[idx], Layout1 );
         }
-              
+
     }
- 
+
     AddFrame( fVF, Layout1 );
 
 
@@ -3827,7 +3827,7 @@ void Dlg_Operation_histos::to_set_fitN( TString epr ){
 
     // when we input like "set fitN 3"
 
-     
+
 
     TObjArray* tmp_array = epr.Tokenize(" ");
     Int_t substringN = tmp_array->GetEntries();
@@ -4039,7 +4039,8 @@ Dlg_Operation_histos::Dlg_Operation_histos(
     //-------------------------------------------------------------------| btn: close the window
 
     fBtn_close = new TGTextButton( fHF_2, "  OK  " );
-    fBtn_close -> Connect( "Clicked()", "Dlg_Operation_histos", this, "CloseWindow()"  );
+    //fBtn_close -> Connect( "Clicked()", "Dlg_Operation_histos", this, "CloseWindow()"  );
+    fBtn_close -> Connect( "Clicked()", "Dlg_Operation_histos", this, "Parse_expression()"  );
     fHF_2->AddFrame( fBtn_close, Layout2 );
     fBtn_close->Resize( 150, fBtn_close->GetDefaultHeight() );
 
@@ -4072,6 +4073,3 @@ Dlg_Operation_histos::Dlg_Operation_histos(
 
 
 }
-
-
-

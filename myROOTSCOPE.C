@@ -1843,7 +1843,9 @@ void ROOTSCOPE::Set_TSpec_Background( ) {
     for (int i = 0; i < Bnbins; i++) hsource[i]=histo->GetBinContent(i + 1);
    
     //TSbg->Background(hsource,Bnbins,10,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder8,kTRUE,TSpectrum::kBackSmoothing5,kTRUE); //compton edges
-    TSbg->Background(hsource,Bnbins,20,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder2,kFALSE,TSpectrum::kBackSmoothing3,kFALSE); //smooth
+    TSbg->Background(hsource,Bnbins,20,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder2,kFALSE,TSpectrum::kBackSmoothing3,kFALSE); //smooth 20
+    //TSbg->Background(hsource,Bnbins,30,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder2,kFALSE,TSpectrum::kBackSmoothing3,kFALSE); //smooth 30
+      //TSbg->Background(hsource,Bnbins,50,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder2,kFALSE,TSpectrum::kBackSmoothing3,kFALSE); //smooth 50
 
    for (int i = 0; i < Bnbins; i++) hBG->SetBinContent(i + 1,hsource[i]);
    
@@ -1939,7 +1941,7 @@ void ROOTSCOPE::To_Draw_bg2() {
     Clear_Marker();
 
     hBG->SetLineColor(kRed);
-    hBG->Draw("same"); 
+    hBG->Draw("same L"); 
     histo->Draw("same"); 
 
     c1->GetPad(fPadActive)->Update();
