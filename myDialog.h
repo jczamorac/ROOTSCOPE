@@ -3096,6 +3096,8 @@ public:
     void    to_apply_formula( TString epr);
 
     void    to_set_fitN( TString epr);
+
+    void    to_set_BgOpt( TString epr);
 };
 
 
@@ -3842,6 +3844,20 @@ void Dlg_Operation_histos::to_set_fitN( TString epr ){
 
 }
 
+void Dlg_Operation_histos::to_set_BgOpt( TString epr ){
+
+    // when we input like "set bgopt 2"
+
+    TObjArray* tmp_array = epr.Tokenize(" ");
+    Int_t substringN = tmp_array->GetEntries();
+
+        
+    TString s_tmp = ( (TObjString*)tmp_array->At(2) )->GetString();
+    *fMessage = "set bgopt:" + s_tmp;
+	
+
+}
+
 // this function parse the mathematical exprssion for the histogram
 // operations. We will validate the input before apply the expression.
 void Dlg_Operation_histos::Parse_expression( ){
@@ -3864,6 +3880,8 @@ void Dlg_Operation_histos::Parse_expression( ){
     else if( epr.Contains("let") ) { to_apply_formula( epr ); }
 
     else if( epr.Contains("set") && epr.Contains("fitN")  ) { to_set_fitN( epr ); }
+
+    else if( epr.Contains("set") && epr.Contains("bgopt")  ) { to_set_BgOpt( epr ); }
 
     CloseWindow();
 

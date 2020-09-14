@@ -1,4 +1,4 @@
-#include </home/juan/proyectos/rootscope_develop/ROOTSCOPE/myROOTSCOPE.C>
+#include </home/adriana/teste-Juan/ROOTSCOPE/myROOTSCOPE.C>
 
 
 void testfit(){
@@ -9,7 +9,7 @@ void testfit(){
 	//TFile* file1 = TFile::Open("HistoC12_TTL15_afterR35.root");
 	//{..some of your code which creates TH2 or TH1 objects..}
 	//TH1F* h_1d = (TH1F*) file1->Get("Calib/Z1Cal");
-	TH1F* h_1d = (TH1F*) file1->Get("Ex/T3EX");
+	TH1F* h_1d = (TH1F*) file1->Get("Raw/Z2Raw");
 	//TH2F* h_2d = (TH2F*) file1->Get("Calib/T2");
 
 	//TH1F* h_1d = (TH1F*) file1->Get("Calib/E1T");
@@ -26,7 +26,8 @@ void testfit(){
 
 /*
 develop version
-
+* type d
+* write -> set bgopt (bg option) 
 * type B for estimate Background
 * type d
 * write -> set fitN (numerofpeaks)

@@ -67,6 +67,8 @@ private:
     int     fUser_generalN;             /* setting from user. */
     float   fGeneral_pickn[NPEAKS];     /* used in N-Gaussian fit */
 
+    int     fUser_generalBg;             /* setting from user. */
+
     float   fBG_const;                  /* bg value, const term */
     float   fBG_linear;                 /* bg value, linear term */
 
@@ -244,6 +246,8 @@ private:
     void Fit_N_Gaussian();
 
     void Set_FitN( unsigned int input ); // set how many Gaussian to fit.
+
+    void Set_BgOpt( unsigned int input ); // set Background option (predefined TSpectrum options).
 
     void Fit_Background();       // for bg = const
 
@@ -1177,6 +1181,8 @@ void ROOTSCOPE::Initialization() {
     general_line2->SetLineColor( kGreen );
     general_line2->SetLineStyle( 2 );
 
+    fUser_generalBg = 0; // by default set 0 option 
+
     fUser_generalN = 2; // by default set 2 aux lines. (ctrl+mouse click)
     for(int p=0; p<NPEAKS; p++){
 	    general_linen[p] = new TLine();
@@ -1842,10 +1848,12 @@ void ROOTSCOPE::Set_TSpec_Background( ) {
 
     for (int i = 0; i < Bnbins; i++) hsource[i]=histo->GetBinContent(i + 1);
    
-    //TSbg->Background(hsource,Bnbins,10,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder8,kTRUE,TSpectrum::kBackSmoothing5,kTRUE); //compton edges
-    TSbg->Background(hsource,Bnbins,20,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder2,kFALSE,TSpectrum::kBackSmoothing3,kFALSE); //smooth 20
-    //TSbg->Background(hsource,Bnbins,30,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder2,kFALSE,TSpectrum::kBackSmoothing3,kFALSE); //smooth 30
-      //TSbg->Background(hsource,Bnbins,50,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder2,kFALSE,TSpectrum::kBackSmoothing3,kFALSE); //smooth 50
+    //std::cout<<"set Tspec bg opt  "<<fUser_generalBg<<std::endl;
+
+    if(fUser_generalBg==0) TSbg->Background(hsource,Bnbins,10,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder8,kTRUE,TSpectrum::kBackSmoothing5,kTRUE); //compton edges
+   if(fUser_generalBg==1) TSbg->Background(hsource,Bnbins,20,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder2,kFALSE,TSpectrum::kBackSmoothing3,kFALSE); //smooth 20               
+    if(fUser_generalBg==2)TSbg->Background(hsource,Bnbins,30,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder2,kFALSE,TSpectrum::kBackSmoothing3,kFALSE); //smooth 30
+      if(fUser_generalBg==3) TSbg->Background(hsource,Bnbins,50,TSpectrum::kBackDecreasingWindow,TSpectrum::kBackOrder2,kFALSE,TSpectrum::kBackSmoothing3,kFALSE); //smooth 50
 
    for (int i = 0; i < Bnbins; i++) hBG->SetBinContent(i + 1,hsource[i]);
    
@@ -2288,6 +2296,14 @@ void ROOTSCOPE::Set_FitN( unsigned int input ) {
     fUser_generalN = input;
 }
 
+void ROOTSCOPE::Set_BgOpt( unsigned int input ) {
+
+    if( input > 3 ){ input = 3; }
+
+    fUser_generalBg = input;
+	
+    //std::cout<<"set bg opt  "<<fUser_generalBg<<std::endl;
+}
 
 
 
@@ -3944,6 +3960,24 @@ void ROOTSCOPE::To_show_histo_operation_dlg() {
             Set_FitN( fitN ); 
             
             *fText_viewer << Form( "set fitN = %d", fitN ) <<  endl;
+            fText_viewer->ShowBottom();
+        }
+    }
+    else if( output_message.Contains("set bgopt:") ){
+
+        
+        TObjArray* tmp_array = output_message.Tokenize(":");
+        Int_t substringN = tmp_array->GetEntries();
+        
+        TString s_tmp = ( (TObjString*)tmp_array->At(substringN-1) )->GetString();
+        
+        if( s_tmp.IsDigit() ) {  
+
+            unsigned int BgOpt = s_tmp.Atoi();
+            
+            Set_BgOpt( BgOpt ); 
+            
+            *fText_viewer << Form( "set Bg option = %d", BgOpt ) <<  endl;
             fText_viewer->ShowBottom();
         }
     }
