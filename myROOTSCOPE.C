@@ -1115,8 +1115,9 @@ void ROOTSCOPE::Get_active_histo1D() {
 
         htemp = dynamic_cast<TH1*> ( element );
         if ( htemp == nullptr ) continue;
+	if (  strncmp(htemp->GetName(), "TSbg",4) == 0) continue;
         histo = htemp; // grab the TH1 address to "histo"
-
+	
 	
 
 
@@ -2234,6 +2235,7 @@ void ROOTSCOPE::Fit_N_Gaussian() {
         fTF1_bg_linear->SetParameter ( 0, fBG_const  );
         fTF1_bg_linear->SetParameter ( 1, fBG_linear );
         fTF1_bg_linear->DrawCopy("same");
+	hBG->DrawCopy("same L"); 
         c1->Update();
 
         // --------------------------------------------| show message
